@@ -14,8 +14,17 @@ public class DockerConfig {
 
 	@Bean
 	public DockerClient getDockerClient() {
+		String osName = System.getProperty("os.name").toLowerCase();
+
+		String dockerHost;
+		if (osName.contains("win")) {
+			dockerHost = "npipe:////./pipe/docker_engine";
+		} else {
+			dockerHost = "unix:///var/run/docker.sock";
+		}
+
 		DefaultDockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-				.withDockerHost("npipe:////./pipe/docker_engine")
+				.withDockerHost(dockerHost)
 				.build();
 
 		ApacheDockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()

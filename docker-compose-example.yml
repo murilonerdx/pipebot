@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  pipebot-app:
+    image: pipebot:latest
+    ports:
+      - "8081:8081"
+    environment:
+      SERVER_PORT: 8081
+      MONGO_HOST: mongo-app
+      MONGO_PORT: 27017
+      MONGO_DB: pipebotdb
+      MONGO_USER: user
+      MONGO_PASSWORD: password
+      CORS_DEV: http://localhost:8080
+      CORS_PRD: https://meusite.com
+    depends_on:
+      - mongo-app
+
+  mongo-app:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: pipebotdb
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
