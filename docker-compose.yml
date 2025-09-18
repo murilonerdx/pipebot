@@ -1,0 +1,55 @@
+services:
+  pipebot-app:
+    image: murilonerdx/pipebot:latest
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker         # ativa profile 'docker'
+      SERVER_PORT: 8081
+      MONGO_HOST: mongo-app
+      MONGO_PORT: 27018
+      MONGO_DB: pipebotdb
+      MONGO_USER: user
+      MONGO_PASSWORD: password
+      CORS_DEV: http://localhost:8080
+      CORS_PRD: https://meusite.com
+    depends_on:
+      - mongo-app
+      - prometheus
+      - jaeger
+      - grafana
+    volumes:
+      - //./pipe/docker_engine://./pipe/docker_engine
+  mongo-app:
+    image: mongo:6.0
+    ports:
+      - "27018:27018"
+    environment:
+      MONGO_INITDB_DATABASE: pipebotdb
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: changeme
+    depends_on:
+      - prometheus
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "14250:14250"
+      - "6831:6831/udp"
