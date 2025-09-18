@@ -1,3 +1,4 @@
+
 services:
   pipebot-app:
     image: murilonerdx/pipebot:latest
@@ -11,8 +12,8 @@ services:
       MONGO_DB: pipebotdb
       MONGO_USER: user
       MONGO_PASSWORD: password
-      CORS_DEV: http://localhost:8080
-      CORS_PRD: http://localhost:8080
+      CORS_DEV: http://localhost:8888
+      CORS_PRD: http://localhost:8888   # Nome do serviço frontend e porta interna
       DOCKER_HOST: unix:///var/run/docker.sock
     depends_on:
       - mongo-app
@@ -21,6 +22,8 @@ services:
       - grafana
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - services
 
   mongo-app:
     image: mongo:6.0
@@ -30,6 +33,8 @@ services:
       MONGO_INITDB_DATABASE: pipebotdb
       MONGO_INITDB_ROOT_USERNAME: user
       MONGO_INITDB_ROOT_PASSWORD: password
+    networks:
+      - services
 
   prometheus:
     image: prom/prometheus:latest
@@ -39,6 +44,8 @@ services:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - services
 
   grafana:
     image: grafana/grafana:latest
@@ -48,6 +55,8 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: changeme
     depends_on:
       - prometheus
+    networks:
+      - services
 
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -55,3 +64,17 @@ services:
       - "16686:16686"
       - "14250:14250"
       - "6831:6831/udp"
+    networks:
+      - services
+
+  frontend:
+    image: murilonerdx/pipebot-app:latest
+    ports:
+      - "8888:88"  # Porta externa:interna
+    environment:
+      NODE_ENV: production
+    networks:
+      - services
+networks:
+  services:
+    driver: bridge
