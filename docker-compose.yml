@@ -1,6 +1,6 @@
 
 services:
-  pipebot-app:
+  pipebot-backend:
     image: murilonerdx/pipebot:latest
     ports:
       - "8081:8081"
@@ -67,7 +67,7 @@ services:
     networks:
       - services
 
-  frontend:
+  pipebot-app:
     image: murilonerdx/pipebot-app:latest
     ports:
       - "8888:88"  # Porta externa:interna
